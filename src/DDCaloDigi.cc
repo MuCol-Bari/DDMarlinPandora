@@ -1564,7 +1564,13 @@ float DDCaloDigi::ahcalEnergyDigi(float energy, int id0, int id1) {
   // small update for time-constant uncorrelated miscalibrations. DJ, Jan 2015
 
   float e_out(energy);
-  if ( _applyHcalDigi==1 ) e_out = scintillatorDigi(energy, false);  // scintillator digi
+  //if ( _applyHcalDigi==1 ) e_out = scintillatorDigi(energy, false);  // scintillator digi
+  float hcal_elec_smearing = _thresholdHcal[0]*0.1; //10% of the threshold energy 
+  if ( _applyHcalDigi==1 ){
+		float neionpairs=1e9*energy/26; //energy to creat an e-ion pair in Argon is 26 eV; energy is in GeV
+		e_out = energy*CLHEP::RandPoisson::shoot( neionpairs )/neionpairs;
+		e_out += CLHEP::RandGauss::shoot( 0, hcal_elec_smearing );  // apply a gaussian smearing to take into account the electronic noise
+	}	
 
   // add electronics dynamic range
   // Sept 2015: Daniel moved this to the ScintillatorDigi part, so it is applied before unfolding of sipm response
